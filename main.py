@@ -45,6 +45,7 @@ class SqliteDB:
             return sqlite3.connect(self.path)
         except sqlite3.Error as e:
             print(e)
+            exit(1)
 
     def get_schema(self) -> str:
         """ Returns a string containing the schema of the database """
@@ -52,7 +53,6 @@ class SqliteDB:
         cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
         tables = cur.fetchall()
         cur.close()
-
 
         schema_details = "SQLite database schema:\n\n"
 
