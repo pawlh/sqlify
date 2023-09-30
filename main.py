@@ -30,32 +30,17 @@ class SQLBot:
         self.messages.append({"role": "assistant", "content": completion.choices[0].message.content})
         return completion.choices[0].message.content
 
-def setup_db() -> sqlite3.Connection:
-    try:
-        conn = sqlite3.connect('Chinook_Sqlite.sqlite')
-    except sqlite3.Error as e:
-        print(e)
-    else:
-        return conn
 
+class SqliteDB:
+    def __init__(self, path: str):
+        self.path = path
+        self.connection = self.setup_db(path)
 
-def ask_openai(schema: str, query: str) -> str:
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-
-    messages = [
-        {"role": "system", "content": "You are SQL bot."},
-        {"role": "system",
-         "content": "You accept requests from humans and translate them into equivalent SQL queries."},
-        {"role": "system", "content": "You never speak normally. You ONLY give valid SQL queries"},
-        {"role": "system", "content": "You are provided a schema, and your queries always match the schema. Your SQL "
-                                      "flavor is sqlite"},
-        {"role": "system", "content": f"This is your schema: ${schema}"},
-        {"role": "user", "content": query}
-    ]
-
-    completion = openai.ChatCompletion.create(model="gpt-3.5-turbo",
-                                              messages=messages)
-    return completion.choices[0].message.content
+    def setup_db(self, path: str) -> sqlite3.Connection:
+        try:
+            return sqlite3.connect(path)
+        except sqlite3.Error as e:
+            print(e)
 
 
 def get_schema(conn: sqlite3.Connection) -> str:
@@ -80,7 +65,13 @@ def get_schema(conn: sqlite3.Connection) -> str:
 
 
 if __name__ == '__main__':
-    conn = setup_db()
+
+    if os.getenv("OPENAI_API_KEY") is None:
+        print("OPENAI_API_KEY environment variable not set.")
+        exit(1)
+
+    db = SqliteDB("Chinook_Sqlite.sqlite")
+    conn = db.connection
     cur = conn.cursor()
     schema = get_schema(conn)
     # print(schema)
