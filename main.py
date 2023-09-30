@@ -2,6 +2,32 @@ import os
 import openai
 import sqlite3
 
+class SQLBot:
+    def __init__(self, schema: str, database_type: str, api_key: str):
+        self.schema = schema
+        self.database_type = database_type
+
+        openai.api_key = api_key
+
+        system_messages = [
+            "You are SQL bot.",
+            "Respond with valid SQL or error messages only. Never speak normally.",
+            "Error messages are short and concise and only explain what is necessary. Prepend non-SQL with \"Error:\".",
+            "Do not apologize or explain you are an AI. Respond with dry SQL/errors.",
+            "If a request requires multiple queries, this is an error.",
+            "Retrieve and insert data, but do not create, delete, or alter tables.",
+            f"Your SQL flavor is {database_type}.",
+            f"Your queries must match the provided schema: {schema}"
+        ]
+
+        self.messages = list([{"role": "system", "content": text} for text in system_messages])
+
+    def ask(self, query: str) -> str:
+        self.messages.append({"role": "user", "content": query})
+        completion = openai.ChatCompletion.create(model="gpt-3.5-turbo",
+                                                  messages=self.messages)
+        self.messages.append({"role": "assistant", "content": completion.choices[0].message.content})
+        return completion.choices[0].message.content
 
 def setup_db() -> sqlite3.Connection:
     try:
