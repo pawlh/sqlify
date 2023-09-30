@@ -38,35 +38,35 @@ class SQLBot:
 class SqliteDB:
     def __init__(self, path: str):
         self.path = path
-        self.connection = self.setup_db(path)
+        self.connection = self.setup_db()
 
-    def setup_db(self, path: str) -> sqlite3.Connection:
+    def setup_db(self) -> sqlite3.Connection:
         try:
-            return sqlite3.connect(path)
+            return sqlite3.connect(self.path)
         except sqlite3.Error as e:
             print(e)
 
     def get_schema(self) -> str:
         """ Returns a string containing the schema of the database """
 
-def get_schema(conn: sqlite3.Connection) -> str:
-    cur = conn.cursor()
-    cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    tables = cur.fetchall()
+        cur = self.connection.cursor()
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = cur.fetchall()
+        cur.close()
 
-    schema_details = "SQLite database schema:\n\n"
+        schema_details = "SQLite database schema:\n\n"
 
-    for table_name in tables:
-        schema_details += table_name[0] + ":\n"
+        for table_name in tables:
+            schema_details += table_name[0] + ":\n"
 
-        column_info = cur.execute("PRAGMA table_info({})".format(table_name[0])).fetchall()
+            column_info = cur.execute("PRAGMA table_info({})".format(table_name[0])).fetchall()
 
-        for column in column_info:
-            schema_details += column[1] + " " + column[2] + "\n"
+            for column in column_info:
+                schema_details += column[1] + " " + column[2] + "\n"
 
-        schema_details += "\n"
+            schema_details += "\n"
 
-    return schema_details
+        return schema_details
 
 
 if __name__ == '__main__':
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     db = SqliteDB("Chinook_Sqlite.sqlite")
     conn = db.connection
 
-    schema = get_schema(conn)
+    schema = db.get_schema()
 
     sql_bot = SQLBot(schema, "sqlite", os.getenv("OPENAI_API_KEY"))
 
