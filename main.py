@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
     db = SqliteDB("Chinook_Sqlite.sqlite")
     conn = db.connection
-    cur = conn.cursor()
+
     schema = get_schema(conn)
 
     sql_bot = SQLBot(schema, "sqlite", os.getenv("OPENAI_API_KEY"))
@@ -88,13 +88,13 @@ if __name__ == '__main__':
         if query.startswith("Error: "):
             print(query)
             continue
-
+        cur = conn.cursor()
         cur.execute(query)
 
         column_names = [i[0] for i in cur.description]
-
         rows = cur.fetchall()
+        cur.close()
+
         print(tabulate(rows, headers=column_names, tablefmt="grid"))
 
-    cur.close()
     conn.close()
