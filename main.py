@@ -1,6 +1,7 @@
 import os
 import openai
 import sqlite3
+from tabulate import tabulate
 
 class SQLBot:
     def __init__(self, schema: str, database_type: str, api_key: str):
