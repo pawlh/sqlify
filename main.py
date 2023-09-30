@@ -25,6 +25,9 @@ class SQLBot:
         self.messages = list([{"role": "system", "content": text} for text in system_messages])
 
     def ask(self, query: str) -> str:
+        """ Queries the bot with the given string and returns the response in the context of the current
+        conversation."""
+
         self.messages.append({"role": "user", "content": query})
         completion = openai.ChatCompletion.create(model="gpt-3.5-turbo",
                                                   messages=self.messages)
@@ -43,6 +46,8 @@ class SqliteDB:
         except sqlite3.Error as e:
             print(e)
 
+    def get_schema(self) -> str:
+        """ Returns a string containing the schema of the database """
 
 def get_schema(conn: sqlite3.Connection) -> str:
     cur = conn.cursor()
