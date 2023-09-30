@@ -48,18 +48,20 @@ class SqliteDB:
 
     def get_schema(self) -> str:
         """ Returns a string containing the schema of the database """
-
         cur = self.connection.cursor()
         cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
         tables = cur.fetchall()
         cur.close()
+
 
         schema_details = "SQLite database schema:\n\n"
 
         for table_name in tables:
             schema_details += table_name[0] + ":\n"
 
+            cur = self.connection.cursor()
             column_info = cur.execute("PRAGMA table_info({})".format(table_name[0])).fetchall()
+            cur.close()
 
             for column in column_info:
                 schema_details += column[1] + " " + column[2] + "\n"
