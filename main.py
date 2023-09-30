@@ -73,13 +73,27 @@ if __name__ == '__main__':
     conn = db.connection
     cur = conn.cursor()
     schema = get_schema(conn)
-    # print(schema)
-    query = ask_openai(schema, "List all the customers who bought a track from the genre Rock. Also give me the "
-                               "composer")
 
-    print(query)
-    print()
+    sql_bot = SQLBot(schema, "sqlite", os.getenv("OPENAI_API_KEY"))
 
-    cur.execute(query)
-    print(cur.fetchall())
+    print("Enter your query or type \"exit\" to quit.")
+    while True:
+        request = input(">")
+        if request == "exit":
+            break
+
+        query = sql_bot.ask(request)
+
+        if query.startswith("Error: "):
+            print(query)
+            continue
+
+        cur.execute(query)
+
+        column_names = [i[0] for i in cur.description]
+
+        rows = cur.fetchall()
+        print(tabulate(rows, headers=column_names, tablefmt="grid"))
+
+    cur.close()
     conn.close()
