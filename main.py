@@ -48,20 +48,19 @@ def get_schema(conn: sqlite3.Connection) -> str:
     cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
     tables = cur.fetchall()
 
-    # Build schema string
-    schema = "SQLite database schema:\n\n"
+    schema_details = "SQLite database schema:\n\n"
 
     for table_name in tables:
-        schema += table_name[0] + ":\n"
+        schema_details += table_name[0] + ":\n"
 
         column_info = cur.execute("PRAGMA table_info({})".format(table_name[0])).fetchall()
 
         for column in column_info:
-            schema += column[1] + " " + column[2] + "\n"
+            schema_details += column[1] + " " + column[2] + "\n"
 
-        schema += "\n"
+        schema_details += "\n"
 
-    return schema
+    return schema_details
 
 
 if __name__ == '__main__':
