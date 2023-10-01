@@ -95,6 +95,7 @@ if __name__ == '__main__':
         if query.startswith("Error: "):
             print(query)
             continue
+
         cur = conn.cursor()
         cur.execute(query)
 
@@ -102,6 +103,9 @@ if __name__ == '__main__':
         rows = cur.fetchall()
         cur.close()
 
+        print(tabulate([["Query"], [query]], tablefmt="grid"))
         print(tabulate(rows, headers=column_names, tablefmt="grid"))
+
+        # TODO: should the results be fed back into the bot?
 
     conn.close()
