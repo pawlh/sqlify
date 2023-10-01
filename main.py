@@ -18,6 +18,7 @@ class SQLBot:
             "Do not apologize or explain you are an AI. Respond with dry SQL/errors.",
             "If a request requires multiple queries, this is an error.",
             "Retrieve and insert data, but do not create, delete, or alter tables.",
+            "The user might report back the results of the query, but only reference this if asked by the user.",
             f"Your SQL flavor is {database_type}.",
             f"Your queries must match the provided schema: {schema}"
         ]
@@ -33,6 +34,11 @@ class SQLBot:
                                                   messages=self.messages)
         self.messages.append({"role": "assistant", "content": completion.choices[0].message.content})
         return completion.choices[0].message.content
+
+    def append_query_results(self, message: str):
+        """ Appends the given message to the conversation history with the given role. """
+
+        self.messages.append({"role": "user", "content": f"Here were the results of the query: {message}"})
 
 
 class SqliteDB:
@@ -104,8 +110,10 @@ if __name__ == '__main__':
         cur.close()
 
         print(tabulate([["Query"], [query]], tablefmt="grid"))
-        print(tabulate(rows, headers=column_names, tablefmt="grid"))
+        table_view = tabulate(rows, headers=column_names, tablefmt="grid")
+        print(table_view)
 
         # TODO: should the results be fed back into the bot?
+        # sql_bot.append_query_results(table_view)
 
     conn.close()
