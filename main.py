@@ -53,8 +53,20 @@ class SqliteDB:
             print(e)
             exit(1)
 
+    def setup_db_schema_and_seed(self, schema_file_path: str) -> sqlite3.Connection:
+        try:
+            cur = self.connection.cursor()
+            cur.executescript(open(schema_file_path, "r").read())
+            conn.commit()
+            cur.close()
+            return conn
+        except sqlite3.Error as e:
+            print(e)
+            exit(1)
+
     def get_schema(self) -> str:
         """ Returns a string containing the schema of the database """
+
         cur = self.connection.cursor()
         cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
         tables = cur.fetchall()
@@ -83,7 +95,9 @@ if __name__ == '__main__':
         print("OPENAI_API_KEY environment variable not set.")
         exit(1)
 
-    db = SqliteDB("Chinook_Sqlite.sqlite")
+    db = SqliteDB("nfl.db")
+    # db.setup_db_schema_and_seed("setup_db.sql")
+
     conn = db.connection
 
     schema = db.get_schema()
