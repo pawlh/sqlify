@@ -117,7 +117,14 @@ if __name__ == '__main__':
             continue
 
         cur = conn.cursor()
-        cur.execute(query)
+        try:
+            cur.execute(query)
+        except sqlite3.OperationalError as e:
+            print("SQLBot gave an invalid query: ", query)
+            print()
+            print("Error message: ", e)
+            sql_bot.append_query_results(str(e))
+            continue
 
         column_names = [i[0] for i in cur.description]
         rows = cur.fetchall()
@@ -128,6 +135,6 @@ if __name__ == '__main__':
         print(table_view)
 
         # TODO: should the results be fed back into the bot?
-        # sql_bot.append_query_results(table_view)
+        sql_bot.append_query_results(table_view)
 
     conn.close()
